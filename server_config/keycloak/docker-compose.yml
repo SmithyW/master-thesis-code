@@ -1,0 +1,22 @@
+name: "keycloak"
+
+services:  
+  keycloak:
+    container_name: keycloak
+    restart: always
+    image: quay.io/keycloak/keycloak:25.0.2
+    env_file: .keycloak.env
+    entrypoint: ["/opt/keycloak/bin/kc.sh", "start"]
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.keycloak-redirect-web-secure.redirectscheme.scheme=https"
+      - "traefik.http.routers.keycloak.middlewares=keycloak-redirect-web-secure"
+      - "traefik.http.routers.keycloak.rule=Host(`<host>`)"
+      - "traefik.http.routers.keycloak.entrypoints=web"
+      - "traefik.http.routers.keycloak-secure.rule=Host(`<host>`)"
+      - "traefik.http.routers.keycloak-secure.tls.certresolver=myresolver"
+      - "traefik.http.routers.keycloak-secure.entrypoints=web-secure"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+
