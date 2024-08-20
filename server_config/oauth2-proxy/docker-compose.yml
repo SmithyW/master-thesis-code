@@ -1,0 +1,25 @@
+name: "oauth2-proxy"
+
+services:
+  oauth2-proxy:
+    container_name: oauth2-proxy
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
+    hostname: oauth2-proxy
+    command: --config /oauth2-proxy.cfg
+    networks:
+      - traefik
+    volumes:
+      - ./templates:/templates:ro
+      - ./oauth2-proxy.cfg:/oauth2-proxy.cfg
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.oauth2-proxy-redirect-web-secure.redirectscheme.scheme=https"
+      - "traefik.http.routers.oauth2-proxy.rule=(Host(`auth.example.com`) && PathPrefix(`/oauth2/`)) || (PathPrefix(`/oauth2/`))"
+      - "traefik.http.routers.oauth2-proxy-secure.rule=(Host(`auth.example.com`) && PathPrefix(`/oauth2/`)) || (PathPrefix(`/oauth2/`))"
+      - "traefik.http.routers.oauth2-proxy.tls.certresolver=myresolver"
+      - "traefik.http.routers.oauth2-proxy-secure.entrypoints=web-secure"
+      - "traefik.http.services.oauth2-proxy.loadbalancer.server.port=4180"
+      - "traefik.http.routers.oauth2-proxy.middlewares=oauth2-proxy-redirect-web-secure"
+    depends_on:
+      - keycloak
+    restart: unless-stopped
