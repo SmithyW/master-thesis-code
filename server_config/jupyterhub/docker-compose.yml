@@ -1,0 +1,34 @@
+name: "jupyterhub"
+
+services:
+  jupyterhub:
+    container_name: jupyterhub
+    build: .
+    networks:
+      - traefik
+      - jupyterhub-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.http.middlewares.jupyterhub-redirect-web-secure.redirectscheme.scheme=https"
+      - "traefik.http.routers.jupyterhub.rule=Host(`<domain>`)"
+      - "traefik.http.routers.jupyterhub-secure.rule=Host(`<domain>`)"
+      - "traefik.http.routers.jupyterhub-secure.tls.certresolver=myresolver"
+      - "traefik.http.routers.jupyterhub-secure.entrypoints=web-secure"
+      - "traefik.http.services.jupyterhub.loadbalancer.server.port=8000"
+      - "traefik.http.routers.jupyterhub.middlewares=jupyterhub-redirect-web-secure"
+    depends_on:
+      - oauth2-proxy
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py:ro"
+      - "jupyterhub-data:/data"
+    environment:
+      DOCKER_NOTEBOOK_IMAGE: jupyterhub-singleuser-mlops:0.13
+      DOCKER_NETWORK_NAME: jupyterhub-network
+      DOCKER_NOTEBOOK_DIR: /home/jovyan/work
+    restart: unless-stopped
+
+volumes:
+  jupyterhub-data:
+
