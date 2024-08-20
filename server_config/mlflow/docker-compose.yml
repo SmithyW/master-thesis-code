@@ -1,0 +1,21 @@
+name: "mlflow"
+
+services:
+  mlflow:
+    container_name: mlflow
+    build: .
+    env_file: .mlflow.env
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.mlflow-redirect-web-secure.redirectscheme.scheme=https"
+      - "traefik.http.routers.mlflow.rule=Host(`<host>`)"
+      - "traefik.http.services.mlflow.loadbalancer.server.port=5000"
+      - "traefik.http.routers.mlflow-secure.rule=Host(`<host>`)"
+      - "traefik.http.routers.mlflow-secure.tls.certresolver=myresolver"
+      - "traefik.http.routers.mlflow-secure.entrypoints=web-secure"
+      - "traefik.http.routers.mlflow.middlewares=mlflow-redirect-web-secure"
+      - "traefik.http.routers.mlflow-secure.middlewares=oauth@file"
+    depends_on:
+      - oauth2-proxy
