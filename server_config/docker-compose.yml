@@ -1,0 +1,15 @@
+name: mlops
+
+include:
+  #- prefect/docker-compose.yml
+  - mlflow/docker-compose.yml
+  - jupyterhub/docker-compose.yml
+  - oauth2-proxy/docker-compose.yml
+  - keycloak/docker-compose.yml
+
+networks:
+  traefik:
+    external: true
+    name: traefik_proxy
+  jupyterhub-network:
+    name: jupyterhub-network
