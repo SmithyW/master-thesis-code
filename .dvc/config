@@ -1,0 +1,5 @@
+[core]
+    remote = storage
+['remote "storage"']
+    url = azure://kfz-wissor/customer-segmentation
+    account_name = mastiabistore

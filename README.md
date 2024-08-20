@@ -1,1 +1,1 @@
-# master-thesis-code
+# master-thesis-mlops-study-imlpementation
